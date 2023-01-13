@@ -1,7 +1,6 @@
 package com.batch.service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,27 +11,28 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ExcelService {
 
-	public List<Map<String, Object>> read(InputStream input) {
+	public List<Map<String, Object>> read(MultipartFile file) {
 
-		Workbook workBook = getWorkBook(input);
+		Workbook workBook = getWorkBook(file);
 
 		final List<Map<String, Object>> list = new ArrayList<>();
 		if (workBook.iterator().hasNext()) {
 			IntStream.range(0, workBook.getNumberOfSheets()).parallel().filter(i -> workBook.getSheetAt(i) != null)
 					.forEach(i -> {
-						IntStream.range(0, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
+						IntStream.range(1, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
 								.filter(j -> workBook.getSheetAt(i).getRow(j) != null).forEach(j -> {
-
+									Row headerRow = workBook.getSheetAt(i).getRow(0);
 									try {
 										Map<String, Object> map = new HashMap<>();
-										IntStream.range(1, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
+										IntStream.range(0, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
 												.filter(k -> workBook.getSheetAt(i).getRow(j).getCell(k) != null)
 												.forEach(k -> {
-													Row headerRow = workBook.getSheetAt(i).getRow(0);
+													
 													Object value = null;
 													switch (workBook.getSheetAt(i).getRow(j).getCell(k).getCellType()) {
 													case BLANK:
@@ -75,12 +75,12 @@ public class ExcelService {
 
 	}
 
-	private Workbook getWorkBook(InputStream input) {
+	private Workbook getWorkBook(MultipartFile file) {
 
 		Workbook workBook = null;
 
 		try {
-			workBook = new XSSFWorkbook(input);
+			workBook = new XSSFWorkbook(file.getInputStream());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
