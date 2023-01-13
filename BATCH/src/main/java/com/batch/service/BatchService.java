@@ -1,8 +1,7 @@
 package com.batch.service;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +22,15 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MethodInvoker;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 import com.batch.annotation.Excel;
 import com.batch.dto.OrgMappingDTO;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 
 @Service
 @RequiredArgsConstructor
