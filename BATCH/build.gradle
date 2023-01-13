@@ -29,12 +29,10 @@ dependencies {
     implementation 'org.apache.poi:poi:4.1.2'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
 	implementation 'org.apache.poi:poi-ooxml:4.1.2' 
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
+	//implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
 	implementation 'org.springframework.boot:spring-boot-starter'
   	implementation 'org.springframework.cloud:spring-cloud-function-context'
 	implementation 'com.amazonaws:aws-lambda-java-runtime-interface-client:2.1.1'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework.cloud:spring-cloud-function-adapter-aws'
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
