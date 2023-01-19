@@ -1,5 +1,6 @@
 package com.batch.service;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MethodInvoker;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.batch.annotation.Excel;
 import com.batch.dto.OrgMappingDTO;
@@ -40,14 +40,13 @@ public class BatchService {
 
 	private final JobLauncher launcher;
 
-	public BatchStatus batch(MultipartFile file) {
+	public BatchStatus batch(InputStream stream) {
 
-		List<Map<String, Object>> list = excelService.read(file);
+		List<Map<String, Object>> list = excelService.read(stream);
 
 		Step step = stepBuilderFactory.get("step").<Map<String, Object>, OrgMappingDTO>chunk(100)
 				.reader(new ListItemReader<Map<String, Object>>(list))
 				.processor(new ItemProcessor<Map<String, Object>, OrgMappingDTO>() {
-					
 					@Override
 					public OrgMappingDTO process(Map<String, Object> item) throws Exception {
 						OrgMappingDTO dto = new OrgMappingDTO();
@@ -70,6 +69,7 @@ public class BatchService {
 				}).writer(new ItemWriter<OrgMappingDTO>() {
 					@Override
 					public void write(List<? extends OrgMappingDTO> items) throws Exception {
+						
 					}
 				}).build();
 

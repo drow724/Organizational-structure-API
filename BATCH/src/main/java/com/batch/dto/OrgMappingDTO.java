@@ -2,10 +2,12 @@ package com.batch.dto;
 
 import com.batch.annotation.Excel;
 
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 @Setter
+@Getter
 @ToString
 public class OrgMappingDTO {
 
