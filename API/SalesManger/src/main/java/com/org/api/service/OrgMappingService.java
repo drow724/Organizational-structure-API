@@ -1,4 +1,4 @@
-package com.org.api;
+package com.org.api.service;
 
 import org.json.JSONException;
 import org.json.JSONObject;
