@@ -29,7 +29,6 @@ dependencies {
     implementation 'org.apache.poi:poi:4.1.2'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
 	implementation 'org.apache.poi:poi-ooxml:4.1.2' 
-	//implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
 	implementation 'org.springframework.boot:spring-boot-starter'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-rsocket
 	//implementation 'org.springframework.boot:spring-boot-starter-rsocket:2.2.0.M2'
