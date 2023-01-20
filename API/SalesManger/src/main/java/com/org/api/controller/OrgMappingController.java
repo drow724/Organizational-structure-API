@@ -3,6 +3,7 @@ package com.org.api.controller;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +25,9 @@ public class OrgMappingController {
 	private final OrgMappingService orgMappingService;
 
 	@PostMapping("orgMapping")
-	public void OrgMapping(@RequestBody FileDTO document) {
+	public ResponseEntity<String> OrgMapping(@RequestBody FileDTO document) {
 		orgMappingService.mapping(document.getFile());
+		return ResponseEntity.ok("Commit");
 	}
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
