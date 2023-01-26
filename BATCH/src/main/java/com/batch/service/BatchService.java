@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.ItemReadListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -20,6 +24,7 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MethodInvoker;
 
@@ -40,12 +45,26 @@ public class BatchService {
 
 	private final JobLauncher launcher;
 
+	private final RSocketRequester rSocketRequester;
+
 	public BatchStatus batch(InputStream stream) {
 
 		List<Map<String, Object>> list = excelService.read(stream);
 
-		Step step = stepBuilderFactory.get("step").<Map<String, Object>, OrgMappingDTO>chunk(100)
-				.reader(new ListItemReader<Map<String, Object>>(list))
+		Step step = stepBuilderFactory.get("step").listener(new StepExecutionListener() {
+
+			@Override
+			public void beforeStep(StepExecution stepExecution) {
+				System.out.println(stepExecution.getReadCount());
+
+			}
+
+			@Override
+			public ExitStatus afterStep(StepExecution stepExecution) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		}).<Map<String, Object>, OrgMappingDTO>chunk(100).reader(new ListItemReader<Map<String, Object>>(list))
 				.processor(new ItemProcessor<Map<String, Object>, OrgMappingDTO>() {
 					@Override
 					public OrgMappingDTO process(Map<String, Object> item) throws Exception {
@@ -55,8 +74,9 @@ public class BatchService {
 							for (Field field : dto.getClass().getDeclaredFields()) {
 								if (!field.isSynthetic() && !field.getName().startsWith("$")
 										&& key.equals(field.getDeclaredAnnotation(Excel.class).title())) {
-									invoker.setTargetMethod("set" + String.valueOf(field.getName().charAt(0)).toUpperCase()
-											+ field.getName().substring(1, field.getName().length()));
+									invoker.setTargetMethod(
+											"set" + String.valueOf(field.getName().charAt(0)).toUpperCase()
+													+ field.getName().substring(1, field.getName().length()));
 									invoker.setTargetObject(dto);
 									invoker.setArguments(item.get(key));
 									invoker.prepare();
@@ -69,7 +89,13 @@ public class BatchService {
 				}).writer(new ItemWriter<OrgMappingDTO>() {
 					@Override
 					public void write(List<? extends OrgMappingDTO> items) throws Exception {
-						
+						Boolean result = rSocketRequester.route("orgMapping").data(items).retrieveMono(Boolean.class)
+								.block();
+						if (result) {
+							return;
+						} else {
+							throw new IllegalStateException();
+						}
 					}
 				}).build();
 
