@@ -36,7 +36,6 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-function-adapter-aws'
     //Local TEST
     implementation 'org.springframework.cloud:spring-cloud-starter-function-web'
-
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'

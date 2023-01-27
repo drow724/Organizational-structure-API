@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.ItemReadListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -52,13 +51,17 @@ public class BatchService {
 		List<Map<String, Object>> list = excelService.read(stream);
 
 		Step step = stepBuilderFactory.get("step").listener(new StepExecutionListener() {
-
+			
 			@Override
 			public void beforeStep(StepExecution stepExecution) {
-				System.out.println(stepExecution.getReadCount());
-
+				Boolean result = rSocketRequester.route("before").retrieveMono(Boolean.class).block();
+				if (result) {
+					return;
+				} else {
+					throw new IllegalStateException();
+				}
 			}
-
+			
 			@Override
 			public ExitStatus afterStep(StepExecution stepExecution) {
 				// TODO Auto-generated method stub
@@ -110,6 +113,7 @@ public class BatchService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return execution.getStatus();
 	}
 }

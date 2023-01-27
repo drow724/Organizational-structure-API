@@ -21,54 +21,48 @@ public class ExcelService {
 		Workbook workBook = getWorkBook(stream);
 
 		final List<Map<String, Object>> list = new ArrayList<>();
-
 		if (workBook.iterator().hasNext()) {
 			IntStream.range(0, workBook.getNumberOfSheets()).parallel().filter(i -> workBook.getSheetAt(i) != null)
 					.forEach(i -> {
-						IntStream.range(1, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
+						IntStream.range(1, workBook.getSheetAt(i).getPhysicalNumberOfRows())
 								.filter(j -> workBook.getSheetAt(i).getRow(j) != null).forEach(j -> {
 									Row headerRow = workBook.getSheetAt(i).getRow(0);
-									try {
-										Map<String, Object> map = new HashMap<>();
-										IntStream.range(0, workBook.getSheetAt(i).getPhysicalNumberOfRows()).parallel()
-												.filter(k -> workBook.getSheetAt(i).getRow(j).getCell(k) != null)
-												.forEach(k -> {
-													
-													Object value = null;
-													switch (workBook.getSheetAt(i).getRow(j).getCell(k).getCellType()) {
-													case BLANK:
-														value = "";
-														break;
-													case BOOLEAN:
-														value = workBook.getSheetAt(i).getRow(j).getCell(k)
-																.getBooleanCellValue();
-														break;
-													case FORMULA:
-														value = workBook.getSheetAt(i).getRow(j).getCell(k)
-																.getCellFormula();
-														break;
-													case NUMERIC:
-														value = workBook.getSheetAt(i).getRow(j).getCell(k)
-																.getNumericCellValue();
-														break;
-													case STRING:
-														value = workBook.getSheetAt(i).getRow(j).getCell(k)
-																.getStringCellValue();
-														break;
-													case ERROR:
-														break;
-													case _NONE:
-														break;
-													default:
-														break;
-													}
-													map.put(headerRow.getCell(k).getStringCellValue(), value);
-												});
-										list.add(map);
-									} catch (IllegalArgumentException | SecurityException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+									Map<String, Object> map = new HashMap<>();
+									IntStream.range(0, workBook.getSheetAt(i).getRow(j).getPhysicalNumberOfCells())
+											.parallel().filter(k -> workBook.getSheetAt(i).getRow(j).getCell(k) != null)
+											.forEach(k -> {
+
+												Object value = null;
+												switch (workBook.getSheetAt(i).getRow(j).getCell(k).getCellType()) {
+												case BLANK:
+													value = "";
+													break;
+												case BOOLEAN:
+													value = workBook.getSheetAt(i).getRow(j).getCell(k)
+															.getBooleanCellValue();
+													break;
+												case FORMULA:
+													value = workBook.getSheetAt(i).getRow(j).getCell(k)
+															.getCellFormula();
+													break;
+												case NUMERIC:
+													value = workBook.getSheetAt(i).getRow(j).getCell(k)
+															.getNumericCellValue();
+													break;
+												case STRING:
+													value = workBook.getSheetAt(i).getRow(j).getCell(k)
+															.getStringCellValue();
+													break;
+												case ERROR:
+													break;
+												case _NONE:
+													break;
+												default:
+													break;
+												}
+												map.put(headerRow.getCell(k).getStringCellValue(), value);
+											});
+									list.add(map);
 								});
 					});
 		}

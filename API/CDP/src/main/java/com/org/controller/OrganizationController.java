@@ -23,8 +23,13 @@ public class OrganizationController {
 
 	private final OrganizationService organizationService;
 
+	@MessageMapping("before")
+	public Mono<Boolean> deleteAll() {
+		return organizationService.deleteAll().then(Mono.just(Boolean.TRUE));
+	}
+	
 	@MessageMapping("orgMapping")
-	public Mono<Boolean> currentMarketData(List<OrgMappingDTO> list) {
+	public Mono<Boolean> addList(List<OrgMappingDTO> list) {
 		return organizationService.organize(list).then(Mono.just(Boolean.TRUE));
 	}
 

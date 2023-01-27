@@ -31,4 +31,8 @@ public class OrganizationService {
 		return organizationRepository.findBy(pageable).collectList().zipWith(organizationRepository.count())
 				.map(data -> new PageImpl<Organization>(data.getT1(), pageable, data.getT2()));
 	}
+
+	public Mono<Void> deleteAll() {
+		return organizationRepository.deleteAll();
+	}
 }
