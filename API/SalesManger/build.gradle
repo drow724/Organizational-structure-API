@@ -32,5 +32,6 @@ dependencies {
 }
 
 tasks.named('test') {
+	systemProperty 'jasypt.encryptor.password', System.getProperty('jasypt.encryptor.password')
 	useJUnitPlatform()
 }
