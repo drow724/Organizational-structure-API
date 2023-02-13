@@ -19,7 +19,8 @@ public class OrganizationController {
 
 	@MessageMapping("before")
 	public Mono<Boolean> deleteAll() {
-		return organizationService.deleteAll().then(Mono.just(Boolean.TRUE));
+		organizationService.deleteAll();
+		return Mono.just(Boolean.TRUE);
 	}
 	
 	@MessageMapping("orgMapping")

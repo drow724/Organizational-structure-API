@@ -12,7 +12,6 @@ import com.org.repository.OrgMongoRepository;
 import com.org.repository.OrgPersistRepository;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,8 @@ public class OrganizationService {
 				.subscribe();
 	}
 
-	public Mono<Void> deleteAll() {
-		return orgPersistRepository.deleteAll();
+	public void deleteAll() {
+		orgPersistRepository.deleteAll().subscribe();
+		orgMongoRepository.deleteAll().subscribe();
 	}
 }
