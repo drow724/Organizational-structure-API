@@ -13,7 +13,6 @@ import com.org.repository.OrgMongoRepository;
 import com.org.repository.OrgPersistRepository;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,10 +24,10 @@ public class OrganizationService {
 
 	private final OrgMongoRepository orgMongoRepository;
 
-	public Mono<Boolean> organize(List<OrgMappingDTO> list) {
+	public Flux<OrgDocument> organize(List<OrgMappingDTO> list) {
 		return orgPersistRepository
 				.saveAll(list.parallelStream().map(map -> new Organization(map)).collect(Collectors.toList()))
-				.map(org -> new OrgDocument(org)).doOnNext(org -> orgMongoRepository.save(org).then()).then(Mono.just(Boolean.TRUE));
+				.map(org -> new OrgDocument(org)).doOnNext(org -> orgMongoRepository.save(org));
 	}
 
 	public Flux<OrgDocument> retriveOrg(Pageable pageable) {
