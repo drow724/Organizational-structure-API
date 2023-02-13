@@ -23,6 +23,7 @@ dependencies {
  	implementation platform('software.amazon.awssdk:bom:2.15.0')
  	implementation 'software.amazon.awssdk:lambda'
  	implementation 'org.json:json:20220924'
+ 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
  	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'io.r2dbc:r2dbc-h2'
