@@ -26,7 +26,7 @@ public class OrganizationService {
 	private final OrgMongoRepository orgMongoRepository;
 
 	public void organize(List<OrgMappingDTO> list) {
-		orgPersistRepository.saveAll(list.parallelStream().map(map -> new Organization(map)).collect(Collectors.toList())).collectList().doOnNext(orgs -> orgMongoRepository.saveAll(orgs.parallelStream().map(org -> new OrgDocument(org)).toList()).subscribe()).subscribe();
+		orgPersistRepository.saveAll(list.parallelStream().map(map -> new Organization(map)).collect(Collectors.toList())).collectList().doOnNext(orgs -> orgMongoRepository.saveAll(orgs.parallelStream().map(org -> new OrgDocument(org)).toList())).subscribe();
 	}
 
 	public Flux<OrgDocument> retriveOrg(Pageable pageable) {
