@@ -30,7 +30,8 @@ public class OrganizationController {
 	
 	@MessageMapping("orgMapping")
 	public Mono<Boolean> addList(List<OrgMappingDTO> list) {
-		return organizationService.organize(list).then(Mono.just(Boolean.TRUE));
+		organizationService.organize(list);
+		return Mono.just(Boolean.TRUE);
 	}
 
 	@GetMapping("/api/organization")

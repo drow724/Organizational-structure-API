@@ -2,6 +2,7 @@ package com.org.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,10 @@ public class OrganizationService {
 
 	private final OrgMongoRepository orgMongoRepository;
 
-	public Flux<OrgDocument> organize(List<OrgMappingDTO> list) {
-		return orgPersistRepository
-				.saveAll(list.parallelStream().map(map -> new Organization(map)).collect(Collectors.toList()))
-				.map(org -> new OrgDocument(org)).doOnNext(org -> orgMongoRepository.save(org));
+	public void organize(List<OrgMappingDTO> list) {
+		Stream<Organization> orgs = orgPersistRepository
+				.saveAll(list.parallelStream().map(map -> new Organization(map)).collect(Collectors.toList())).toStream();
+		orgMongoRepository.saveAll(orgs.parallel().map(org -> new OrgDocument(org)).toList());
 	}
 
 	public Flux<OrgDocument> retriveOrg(Pageable pageable) {
