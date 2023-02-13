@@ -1,11 +1,19 @@
 package com.org.api.service;
 
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.org.api.document.OrgDocument;
+import com.org.api.repository.OrgDocumentRepository;
+
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
@@ -15,10 +23,13 @@ import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.lambda.model.LambdaException;
 
 @Service
+@RequiredArgsConstructor
 public class OrgMappingService {
 
 	private final String functionName = "OrganizationalStructureBatch";
 
+	private final OrgDocumentRepository repository;
+	
 	@Value("${cloud.aws.credentials.accessKey}")
 	private String accessKey;
 
@@ -55,4 +66,9 @@ public class OrgMappingService {
 		}
 		
 	}
+
+	public Flux<OrgDocument> findAll(Pageable pageable) {
+		return repository.findAll(pageable.getSort()).skip(pageable.getOffset()).take(pageable.getPageSize());
+	}
+
 }
