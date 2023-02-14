@@ -1,70 +1,50 @@
 package com.org.api.service;
 
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.org.api.document.OrgDocument;
 import com.org.api.repository.OrgDocumentRepository;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.lambda.LambdaClient;
-import software.amazon.awssdk.services.lambda.model.InvokeRequest;
-import software.amazon.awssdk.services.lambda.model.InvokeResponse;
-import software.amazon.awssdk.services.lambda.model.LambdaException;
 
 @Service
 @RequiredArgsConstructor
 public class OrgMappingService {
 
-	private final String functionName = "OrganizationalStructureBatch";
-
 	private final OrgDocumentRepository repository;
-	
-	@Value("${cloud.aws.credentials.accessKey}")
-	private String accessKey;
 
-	@Value("${cloud.aws.credentials.secretKey}")
-	private String secretKey;
+	private final AmazonS3Client amazonS3Client;
 
-	@Async
-	public void mapping(byte[] document) {
-		Region region = Region.AP_NORTHEAST_2;
-		LambdaClient awsLambda = LambdaClient.builder().region(region)
-				.credentialsProvider(() -> AwsBasicCredentials.create(accessKey, secretKey)).build();
+	@Value("${cloud.aws.s3.bucket}")
+	public String bucket;
 
-		InvokeResponse res = null;
+	public Flux<DataBuffer> mapping(String fileName, Flux<DataBuffer> flux) {
+		return flux.doOnNext(d -> {
+			ObjectMetadata objectMetaData = new ObjectMetadata();
+			objectMetaData.setContentType("xlsx");
+			objectMetaData.setContentLength(d.readableByteCount());
 
-		try {
-			// Need a SdkBytes instance for the payload.
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("file", document);
-			
-			SdkBytes payload = SdkBytes.fromUtf8String(jsonObj.toString());
+			try(InputStream inputStream = d.asInputStream()) {
+				amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetaData)
+                        .withCannedAcl(CannedAccessControlList.PublicRead));
+            } catch(IOException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+            }
+		});
 
-			// Setup an InvokeRequest.
-			InvokeRequest request = InvokeRequest.builder().functionName(functionName).payload(payload).build();
-
-			res = awsLambda.invoke(request);
-
-		} catch (LambdaException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			awsLambda.close();
-		}
-		
 	}
 
 	public Flux<OrgDocument> findAll(Pageable pageable) {
