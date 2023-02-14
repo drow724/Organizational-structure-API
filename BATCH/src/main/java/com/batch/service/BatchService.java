@@ -1,6 +1,5 @@
 package com.batch.service;
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,7 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MethodInvoker;
 
+import com.amazonaws.services.s3.model.S3Object;
 import com.batch.annotation.Excel;
 import com.batch.dto.OrgMappingDTO;
 
@@ -46,12 +46,12 @@ public class BatchService {
 
 	private final RSocketRequester rSocketRequester;
 
-	public BatchStatus batch(InputStream stream) {
+	public BatchStatus batch(S3Object object) {
 
-		List<Map<String, Object>> list = excelService.read(stream);
+		List<Map<String, Object>> list = excelService.read(object.getObjectContent());
 
 		Step step = stepBuilderFactory.get("step").listener(new StepExecutionListener() {
-			
+
 			@Override
 			public void beforeStep(StepExecution stepExecution) {
 				Boolean result = rSocketRequester.route("before").retrieveMono(Boolean.class).block();
@@ -61,7 +61,7 @@ public class BatchService {
 					throw new IllegalStateException();
 				}
 			}
-			
+
 			@Override
 			public ExitStatus afterStep(StepExecution stepExecution) {
 				// TODO Auto-generated method stub
@@ -113,7 +113,7 @@ public class BatchService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return execution.getStatus();
 	}
 }
