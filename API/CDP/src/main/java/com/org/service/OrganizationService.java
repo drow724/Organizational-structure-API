@@ -35,7 +35,8 @@ public class OrganizationService {
 						.saveAll(orgs.parallelStream().map(org -> new OrgDocument(org)).toList()).subscribe())
 				.doOnNext(orgs -> {
 					Map<String, Object> map = new HashMap<>();
-					map.put("all", orgs.size());
+					map.put("data", Integer.valueOf(String.valueOf(map.get("data"))) + orgs.size());
+					System.out.println(map);
 					rSocketRequester.route("progress").data(map).send().subscribe();
 					})
 				.subscribe();
@@ -45,6 +46,8 @@ public class OrganizationService {
 		return orgMongoRepository.count().flatMap(count -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("all", count);
+			map.put("data", 0);
+			System.out.println(map);
 			rSocketRequester.route("progress").data(map).send().doOnNext(s -> {
 				orgPersistRepository.deleteAll().subscribe();
 				orgMongoRepository.deleteAll().subscribe();

@@ -19,25 +19,28 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.org.api.document.OrgDocument;
+import com.org.api.dto.ProgressDTO;
 import com.org.api.service.OrgMappingService;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Sinks.Many;
 
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin
 public class OrgMappingController {
 
-	private final Sinks.Many<Map<String, Object>> sink = Sinks.many().multicast().onBackpressureBuffer();
+	private Many<ProgressDTO> sinks = Sinks.many().multicast().onBackpressureBuffer();
 
 	private final OrgMappingService orgMappingService;
 
 	@MessageMapping("progress")
 	public void channel(final Map<String, Object> data) {
-		sink.tryEmitNext(data);
+		System.out.println(data);
+		sinks.tryEmitNext(new ProgressDTO(data));
 	};
 
 	@PostMapping("orgMapping")
@@ -52,8 +55,8 @@ public class OrgMappingController {
 	}
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<Map<String, Object>> progress() {
-		return sink.asFlux();
+	public Flux<ProgressDTO> progress() {
+		return sinks.asFlux();
 	}
 
 	@GetMapping(value = "orgMapping/excel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
