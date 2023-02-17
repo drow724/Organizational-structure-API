@@ -1,11 +1,8 @@
 package com.org.api.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.print.DocFlavor.STRING;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +62,9 @@ public class OrgMappingController {
 
 	@PostMapping("orgMapping")
 	public Mono<ResponseEntity<String>> OrgMapping(@RequestPart("file") Mono<FilePart> file) {
+		if(map.get("isStart") == null) {
+			map.put("isStart", Boolean.FALSE);
+		}
 		return file.filter(f -> map.get("working") != null && !(Boolean) map.get("isStart"))
 				.doOnNext(f -> orgMappingService.mapping(f.filename(), f.content()).subscribe())
 				.doOnSuccess(t -> map.put("isStart", Boolean.TRUE)).then(Mono.just(ResponseEntity.ok("Commit")))
