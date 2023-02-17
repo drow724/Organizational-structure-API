@@ -16,16 +16,20 @@ import reactor.core.publisher.Mono;
 public class OrganizationController {
 
 	private final OrganizationService organizationService;
-	
+
 	@MessageMapping("before")
 	public Mono<Boolean> deleteAll() {
 		return organizationService.deleteAll();
 	}
-	
+
 	@MessageMapping("orgMapping")
 	public Mono<Boolean> addList(List<OrgMappingDTO> list) {
 		organizationService.organize(list);
 		return Mono.just(Boolean.TRUE);
 	}
 
+	@MessageMapping("after")
+	public Mono<Boolean> done() {
+		return organizationService.done().then(Mono.just(Boolean.TRUE));
+	}
 }

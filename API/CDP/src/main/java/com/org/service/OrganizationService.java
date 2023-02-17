@@ -49,8 +49,15 @@ public class OrganizationService {
 			rSocketRequester.route("progress").data(map).send().subscribe();
 			orgPersistRepository.deleteAll().subscribe();
 			orgMongoRepository.deleteAll().subscribe();
+
 			return Mono.just(Boolean.TRUE);
 		});
 		
+	}
+	
+	public Mono<Void> done() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("isStart", Boolean.FALSE);
+		return Mono.just(rSocketRequester.route("after").data(map).send().subscribe()).then();
 	}
 }

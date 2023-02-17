@@ -1,6 +1,7 @@
 package com.batch.service;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.Step;
@@ -102,7 +104,19 @@ public class BatchService {
 					}
 				}).build();
 
-		Job job = jobBuilderFactory.get("job").start(step).build();
+		Job job = jobBuilderFactory.get("job").listener(new JobExecutionListener() {
+
+			@Override
+			public void beforeJob(JobExecution jobExecution) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void afterJob(JobExecution jobExecution) {
+				rSocketRequester.route("after").retrieveMono(Boolean.class).block();
+			}
+		}).start(step).build();
 
 		JobExecution execution = null;
 
