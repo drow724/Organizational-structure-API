@@ -10,11 +10,11 @@ import lombok.Setter;
 public class ProgressDTO {
 
 	public ProgressDTO(Map<String, Object> data) {
-		this.all = (Long) data.get("all");
-		this.data = (Long) data.get("data");
+		this.all = (Integer) data.get("all");
+		this.data = (Integer) data.get("data");
 	}
 
-	private Long all;
+	private Integer all;
 
-	private Long data;
+	private Integer data;
 }
