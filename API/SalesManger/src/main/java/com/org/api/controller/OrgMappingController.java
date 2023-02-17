@@ -52,6 +52,7 @@ public class OrgMappingController {
 			}
 			
 		}
+		System.out.println(map);
 		sinks.tryEmitNext(map);
 	};
 
