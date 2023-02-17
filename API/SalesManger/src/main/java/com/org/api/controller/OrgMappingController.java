@@ -78,7 +78,7 @@ public class OrgMappingController {
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ServerSentEvent<Map<String, Object>>> progress() {
-		return sinks.asFlux().filter(e -> e.get("data") != null)
+		return sinks.asFlux().filter(e -> e != null && e.get("data") != null)
 				.flatMap(e -> Mono.just(ServerSentEvent.builder(e).build())).switchIfEmpty(Flux.empty());
 	}
 
