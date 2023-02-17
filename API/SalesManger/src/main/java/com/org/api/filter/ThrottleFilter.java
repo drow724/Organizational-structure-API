@@ -19,7 +19,7 @@ public class ThrottleFilter implements WebFilter {
 	
 	private final ConcurrentMap<String, Object> map = new ConcurrentHashMap<>();
 	
-	@Scheduled(cron = "0 0 * * *")
+	@Scheduled(cron = "0 0 0 * * *")
     public Disposable invalidateOtp(){
 
        return Mono.fromCallable(() -> {
