@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.org.api.document.OrgDocument;
 import com.org.api.service.OrgMappingService;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -73,8 +72,8 @@ public class OrgMappingController {
 	}
 
 	@GetMapping("status")
-	public Mono<String> getStatus() {
-		return orgMappingService.getStatus();
+	public Mono<Boolean> getStatus() {
+		return Mono.just((Boolean) map.get("isStart"));
 	}
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

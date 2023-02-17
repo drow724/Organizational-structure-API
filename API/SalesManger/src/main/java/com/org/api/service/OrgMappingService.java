@@ -25,9 +25,6 @@ import com.org.api.repository.OrgDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.services.lambda.LambdaClient;
-import software.amazon.awssdk.services.lambda.model.GetFunctionRequest;
-import software.amazon.awssdk.services.lambda.model.GetFunctionResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +33,6 @@ public class OrgMappingService {
 	private final OrgDocumentRepository repository;
 
 	private final AmazonS3 amazonS3Client;
-
-	private final LambdaClient lambdaClient;
 
 	@Value("${cloud.aws.s3.bucket}")
 	public String bucket;
@@ -57,14 +52,7 @@ public class OrgMappingService {
 		});
 
 	}
-
-	public Mono<String> getStatus() {
-		GetFunctionRequest functionRequest = GetFunctionRequest.builder().functionName("OrganizationalStructureBatch").build();
-
-		GetFunctionResponse response = lambdaClient.getFunction(functionRequest);
-		return Mono.just(response.configuration().stateAsString());
-	}
-
+	
 	public Mono<Page<OrgDocument>> findAll(Pageable pageable) {
 		return repository.findAllBy(pageable).collectList().zipWith(repository.count())
 				.flatMap(t -> Mono.just(new PageImpl<>(t.getT1(), pageable, t.getT2())));
