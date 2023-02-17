@@ -58,6 +58,6 @@ public class OrganizationService {
 	public Mono<Void> done() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("isStart", Boolean.FALSE);
-		return Mono.just(rSocketRequester.route("after").data(map).send().subscribe()).then();
+		return Mono.just(rSocketRequester.route("progress").data(map).send().subscribe()).then();
 	}
 }
