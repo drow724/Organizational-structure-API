@@ -30,7 +30,6 @@ import reactor.core.publisher.Sinks;
 import reactor.core.publisher.Sinks.Many;
 
 @RestController
-@RequiredArgsConstructor
 @CrossOrigin
 public class OrgMappingController {
 
@@ -40,6 +39,10 @@ public class OrgMappingController {
 
 	private final Map<String, Object> map = new ConcurrentHashMap<>();
 
+	public OrgMappingController(OrgMappingService orgMappingService) {
+		map.put("isStart", Boolean.FALSE);
+		this.orgMappingService = orgMappingService;
+	}
 	@MessageMapping("progress")
 	public Mono<Void> channel(final Map<String, Object> data) {
 		if (data.get("isStart") != null) {
@@ -62,9 +65,6 @@ public class OrgMappingController {
 
 	@PostMapping("orgMapping")
 	public Mono<ResponseEntity<String>> OrgMapping(@RequestPart("file") Mono<FilePart> file) {
-		if(map.get("isStart") == null) {
-			map.put("isStart", Boolean.FALSE);
-		}
 		return file.filter(f -> map.get("working") != null && !(Boolean) map.get("isStart"))
 				.doOnNext(f -> orgMappingService.mapping(f.filename(), f.content()).subscribe())
 				.doOnSuccess(t -> map.put("isStart", Boolean.TRUE)).then(Mono.just(ResponseEntity.ok("Commit")))
