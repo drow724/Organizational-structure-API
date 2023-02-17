@@ -1,8 +1,11 @@
 package com.org.api.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.print.DocFlavor.STRING;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,18 +42,19 @@ public class OrgMappingController {
 	private final OrgMappingService orgMappingService;
 
 	private final Map<String, Object> map = new ConcurrentHashMap<>();
+
 	@MessageMapping("progress")
 	public Mono<Void> channel(final Map<String, Object> data) {
-		if(data.get("all") != null) {
+		if (data.get("all") != null) {
 			map.put("all", data.get("all"));
 		}
-		if(data.get("data") != null) {
-			if(map.get("data") != null) {
+		if (data.get("data") != null) {
+			if (map.get("data") != null) {
 				map.put("data", (Integer) map.get("data") + (Integer) data.get("data"));
 			} else {
 				map.put("data", data.get("data"));
 			}
-			
+
 		}
 		return Mono.just(sinks.tryEmitNext(map)).then();
 	};
@@ -66,8 +71,9 @@ public class OrgMappingController {
 	}
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<Map<String, Object>> progress() {
-		return sinks.asFlux();
+	public Flux<ServerSentEvent<Map<String, Object>>> progress() {
+		return sinks.asFlux().filter(e -> e.get("data") != null)
+				.flatMap(e -> Mono.just(ServerSentEvent.builder(e).build())).switchIfEmpty(Flux.empty());
 	}
 
 	@GetMapping(value = "orgMapping/excel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
