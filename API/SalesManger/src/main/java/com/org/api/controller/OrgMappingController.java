@@ -2,6 +2,7 @@ package com.org.api.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,14 +34,25 @@ import reactor.core.publisher.Sinks.Many;
 @CrossOrigin
 public class OrgMappingController {
 
-	private Many<ProgressDTO> sinks = Sinks.many().multicast().onBackpressureBuffer();
+	private Many<Map<String, Object>> sinks = Sinks.many().multicast().onBackpressureBuffer();
 
 	private final OrgMappingService orgMappingService;
 
+	private final Map<String, Object> map = new ConcurrentHashMap<>();
 	@MessageMapping("progress")
 	public void channel(final Map<String, Object> data) {
-		System.out.println(data);
-		sinks.tryEmitNext(new ProgressDTO(data));
+		if(data.get("all") != null) {
+			map.put("all", data.get("all"));
+		}
+		if(data.get("data") != null) {
+			if(map.get("data") != null) {
+				map.put("data", (Integer) map.get("data") + (Integer) data.get("data"));
+			} else {
+				map.put("data", data.get("data"));
+			}
+			
+		}
+		sinks.tryEmitNext(map);
 	};
 
 	@PostMapping("orgMapping")
@@ -55,7 +67,7 @@ public class OrgMappingController {
 	}
 
 	@GetMapping(value = "/progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<ProgressDTO> progress() {
+	public Flux<Map<String, Object>> progress() {
 		return sinks.asFlux();
 	}
 
