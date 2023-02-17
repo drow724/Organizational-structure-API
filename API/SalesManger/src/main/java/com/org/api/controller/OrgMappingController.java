@@ -52,10 +52,10 @@ public class OrgMappingController {
 		}
 		if (data.get("all") != null) {
 			map.put("all", data.get("all"));
-			map.put("data", null);
+			map.put("data", "");
 		}
 		if (data.get("data") != null) {
-			if (map.get("data") != null) {
+			if (map.get("data") != null || !map.get("data").equals("")) {
 				map.put("data", (Integer) map.get("data") + (Integer) data.get("data"));
 			} else {
 				map.put("data", data.get("data"));
