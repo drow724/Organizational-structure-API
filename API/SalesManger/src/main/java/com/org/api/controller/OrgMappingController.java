@@ -43,6 +43,7 @@ public class OrgMappingController {
 		map.put("isStart", Boolean.FALSE);
 		this.orgMappingService = orgMappingService;
 	}
+	
 	@MessageMapping("progress")
 	public Mono<Void> channel(final Map<String, Object> data) {
 		if (data.get("isStart") != null) {
@@ -65,7 +66,7 @@ public class OrgMappingController {
 
 	@PostMapping("orgMapping")
 	public Mono<ResponseEntity<String>> OrgMapping(@RequestPart("file") Mono<FilePart> file) {
-		return file.filter(f -> map.get("working") != null && !(Boolean) map.get("isStart"))
+		return file.filter(f -> map.get("isStart") != null && !(Boolean) map.get("isStart"))
 				.doOnNext(f -> orgMappingService.mapping(f.filename(), f.content()).subscribe())
 				.doOnSuccess(t -> map.put("isStart", Boolean.TRUE)).then(Mono.just(ResponseEntity.ok("Commit")))
 				.switchIfEmpty(Mono.just(ResponseEntity.ok("isWorking")));
