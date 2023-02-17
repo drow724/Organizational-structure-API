@@ -37,7 +37,6 @@ public class OrganizationService {
 					Map<String, Object> map = new HashMap<>();
 					map.put("data", orgs.size());
 					rSocketRequester.route("progress").data(map).send().subscribe();
-					System.out.println(map);
 					})
 				.subscribe();
 	}
@@ -50,7 +49,6 @@ public class OrganizationService {
 			rSocketRequester.route("progress").data(map).send().subscribe();
 			orgPersistRepository.deleteAll().subscribe();
 			orgMongoRepository.deleteAll().subscribe();
-			System.out.println(map);
 			return Mono.just(Boolean.TRUE);
 		});
 		

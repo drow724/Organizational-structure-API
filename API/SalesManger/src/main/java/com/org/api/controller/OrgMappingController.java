@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.org.api.document.OrgDocument;
-import com.org.api.dto.ProgressDTO;
 import com.org.api.service.OrgMappingService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,13 +33,13 @@ import reactor.core.publisher.Sinks.Many;
 @CrossOrigin
 public class OrgMappingController {
 
-	private Many<Map<String, Object>> sinks = Sinks.many().multicast().onBackpressureBuffer();
+	private Many<Map<String, Object>> sinks = Sinks.many().multicast().directAllOrNothing();
 
 	private final OrgMappingService orgMappingService;
 
 	private final Map<String, Object> map = new ConcurrentHashMap<>();
 	@MessageMapping("progress")
-	public void channel(final Map<String, Object> data) {
+	public Mono<Void> channel(final Map<String, Object> data) {
 		if(data.get("all") != null) {
 			map.put("all", data.get("all"));
 		}
@@ -52,8 +51,7 @@ public class OrgMappingController {
 			}
 			
 		}
-		System.out.println(map);
-		sinks.tryEmitNext(map);
+		return Mono.just(sinks.tryEmitNext(map)).then();
 	};
 
 	@PostMapping("orgMapping")
