@@ -34,7 +34,7 @@ import reactor.core.publisher.Sinks.Many;
 @CrossOrigin
 public class OrgMappingController {
 
-	private Many<Map<String, Object>> sinks = Sinks.many().multicast().directAllOrNothing();
+	private Many<Map<String, Object>> sinks = Sinks.many().multicast().onBackpressureBuffer();
 
 	private final OrgMappingService orgMappingService;
 
