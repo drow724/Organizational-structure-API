@@ -33,7 +33,7 @@ public class ThrottleFilter implements WebFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		if(exchange.getRequest().getMethod().equals(HttpMethod.POST) && exchange.getRequest().getURI().toString().contains("orgMapping")) {
 			if(map.get(String.valueOf(exchange.getRequest().getRemoteAddress().getAddress())) != null){
-	            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+	            exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
 	            return exchange.getResponse().setComplete();
 	        } else {
 	        	map.put(String.valueOf(exchange.getRequest().getRemoteAddress().getAddress()), String.valueOf(exchange.getRequest().getRemoteAddress().getAddress()));
